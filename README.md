@@ -1,6 +1,5 @@
 # currency
-An advanced package for handling currencies formats and support for client side reactive currency conversion based
-on Yahoo Finance (yql).
+An advanced package for handling currencies formats and support for client side reactive currency conversion based on Yahoo Finance (yql).
 
 ## Installation
 ```
@@ -70,8 +69,7 @@ Currency.find_all(false); // Get only the non-highlighted currencies
 
 ```
 
-**Note**: Currency support multiple currencies per country.
-If such case occurs. The `Currency.find_by_code(country_code)` will return a list of currencies and
+**Note**: Currency support multiple currencies per country. If such case occurs. The `Currency.find_by_code(country_code)` will return a list of currencies and
 `Currency.find_definitive(country_code)` will throw an error.
 
 ### Currency object methods
@@ -88,11 +86,9 @@ currency.prase_str("$-35.5");   // Returns 35.5 (ignores minus signs)
 
 ## Exchange name space
 The Exchange name space is used to support querying the web for an exchange rates between currencies pair/s.
-Currently Exchange uses Yahoo Query to query for exchange rates but this name space can be expanded to support other
-currencies.
+Currently Exchange uses Yahoo Query to query for exchange rates but this name space can be expanded to support other currencies.
 
-Exchange supports can be used both on the client and on the server but the usage is a bit different. This section will
-concentrate on the common and server only operations.
+Exchange supports can be used both on the client and on the server but the usage is a bit different. This section will concentrate on the common and server only operations.
 
 See the reactivity section for explanation on using Exchange on the client.
 
@@ -100,8 +96,7 @@ See the reactivity section for explanation on using Exchange on the client.
 
 Use the exchange function to find an exchange rate/s from a set of origin currencies to a set of target currencies.
 
-**Note** that the order of the parameters to the functions is `to` and than `from`, since the `from` (origin) currency may
-be the default currency.
+**Note** that the order of the parameters to the functions is `to` and than `from`, since the `from` (origin) currency may be the default currency.
 
 ```javascript
 
@@ -149,7 +144,7 @@ The `exchange` method on the server performs an immediate call the `Exchange` fu
 ```javascript
 
 var def_money = new Money(100,'USD');
-var exchanged_money = def_money.exchange('JPY); // Create new money object with the exchanged rate to Yen
+var exchanged_money = def_money.exchange('JPY'); // Create new money object with the exchanged rate to Yen
 
 ```
 
@@ -160,8 +155,7 @@ Reactivity allows you to avoid network request to your server by allowing the cl
 
 ### General setup
 
-Since the exchange rates are used mainly for estimation (since the final real exchange depends on the money processor exchange rate and on commissions),
-we can update the exchange rates infrequently.
+Since the exchange rates are used mainly for estimation (since the final real exchange depends on the money processor exchange rate and on commissions), we can update the exchange rates infrequently.
 
 The default of the package is to update every 10 minutes. You can change it by modifying the `Exchange.exchange_interval_min` variable:
 
@@ -189,7 +183,7 @@ money_var.set(money);
 
 // The Client's exchange methods create a new money object that tracks
 // the change of the original money as well as the exchange rate change
-var exchanged_money = def_money.exchange('JPY);
+var exchanged_money = def_money.exchange('JPY');
 
 // Reactively setting the value of the original money
 // If you want to change the currency you must create a new money object
@@ -246,6 +240,142 @@ The package also includes few templates and helpers
 * `currencyInfo`: Displays an info about a currency. It works in the context of an Currency object and you can also add a `flag_url` helper (or add it as an attribute on the Currency object).
 * `currencySelector`: Create a select element with all the currencies (with highlighted currencies first). It uses internally the currencyInfo template so it can show also flags.
 * `showMoney`: Just show the reactive value (`money.get_str()`) of a Money object.
+
+## Example:
+
+Following is the html and javascript for a application that performs exchance converssion on the client.
+It uses the OfferJar (InKomerce) API from `ronenm:offerjar-api` to create the list of currencies.
+
+```html
+
+<head>
+  <title>Money Exchange Test</title>
+</head>
+
+<body>
+  <h1>Money Exchange Test</h1>
+
+  {{> fromMoney }}
+  {{> toMoney }}
+</body>
+
+<template name="fromMoney">
+  <h3>From:</h3>
+  {{#if money}}
+    {{#with money}}
+      {{#with currency}}
+        {{>currencySelector}}
+      {{/with}}
+      <form class="set-from-form">
+        <input type="text" name="from" value="{{get_str}}" placeholder="Type the value that you would like to convert" />
+      </form>
+    {{/with}}
+  {{/if}}
+</template>
+
+<template name="toMoney">
+  <h3>To:</h3>
+  {{#if money}}
+    {{#with money}}
+      {{#with currency}}
+        {{>currencySelector}}
+      {{/with}}
+      {{>showMoney}}
+    {{/with}}
+  {{/if}}
+</template>
+
+```
+
+```javascript
+
+if (Meteor.isClient) {
+  Session.set("currencyReady",false);
+  
+  // This app will query for exchange rate every 2 minutes 
+  Exchange.exchange_interval_min = 2;
+  
+  // We start with two empty Money ReactiveVars
+  var from = Money.new_reactive_var();
+  var to = Money.new_reactive_var();
+  
+  // Make US Dollars, Euro and GB Punds the main currencies
+  Currency.set_highlight('USD','EUR','GBP');
+
+  // Connect to OfferJar/InKomerce Global resource
+  // This is the only resource available to clients
+  var global = new OfferJar.Global();
+  
+  // Query the Global resource for list of all currencies
+  // and set them up in the Currency system
+  global.get_currencies(function(error,result) {
+    if (!error) {
+      Currency.create_multiple(result.data);
+      Session.set("currencyReady",true);
+    }
+  });
+  
+  // An autorun to setup the application after currencies are ready
+  Tracker.autorun(function(c) {
+    if (Session.get("currencyReady")) {
+      from.set(new Money(null,"USD"));
+      to.set(from.get().exchange("USD"));
+      c.stop();
+    }
+  });
+  
+  Template.fromMoney.helpers({
+    money: function() {
+      return from.get();
+    }
+  });
+  
+  Template.fromMoney.events({
+    'change select': function(event) {
+      var new_cur = $(event.target).val();
+      if (new_cur != this.code) {
+        // When there is a change in currnecy we must create a new
+        // original Money object and new exchanged money object
+        var cur_money = from.get();
+        from.set(new Money(cur_money.value,new_cur));
+        
+        var to_cur_money = to.get();
+        if (to_cur_money instanceof Money) {
+          to_cur_money.stop_exchange_tracker(); // No need to track the old exchange anymore
+          // Create a new exchange tracking
+          to.set(from.get().exchange(to_cur_money.currency));
+        }
+      }
+    },
+    'blur input[name="from"]': function(event) {
+      // Set the value (it is automatically tracked)
+      from.get().set_str($(event.target).val());
+    }
+  });
+  
+  Template.toMoney.helpers({
+    money: function() {
+      return to.get();
+    }
+  });
+  
+  Template.toMoney.events({
+    'change select': function(event) {
+      var new_cur = $(event.target).val();
+      if (new_cur != this.code) {
+        // When the currnecy change we must create a new Money object
+        var cur_money = to.get();
+        if (cur_money instanceof Money) {
+          cur_money.stop_exchange_tracker(); // Make sure to stop the unnecessary tracking
+          to.set(from.get().exchange(new_cur));
+        }
+      }
+    }
+  });
+}
+
+
+```
 
 ## License
 MIT
