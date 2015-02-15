@@ -1,19 +1,19 @@
 # currency
-An advanced package for handlling currncies formats and support for client side reactive currnecy conversion based
+An advanced package for handling currencies formats and support for client side reactive currency conversion based
 on Yahoo Finance (yql).
 
-## Instalation
+## Installation
 ```
-meteor add ronenm:currnecy
+meteor add ronenm:currency
 ```
 
-## The Currnecy class
-Currnecy class is used to hold a currnecy definition.
-Currnecy is available to both client and server
+## The Currency class
+Currency class is used to hold a currency definition.
+Currency is available to both client and server
 
 ```javascript
 
-// Create a single currnecy
+// Create a single currency
 new Currency('United States', 'USD', '$', '%{symbol}%<value>.2f', true);
 
 // or
@@ -31,14 +31,14 @@ Currency.create_multiple(<array_of_options>);
 
 ```
 
-When a currnecy is created, it is being held in an internal cache so there is no need to hold it in a variable.
+When a currency is created, it is being held in an internal cache so there is no need to hold it in a variable.
 
-### The Currnecy options
+### The Currency options
 
 * **country**: The country of the currency.
 * **code**: The ISO code of the currency (the ISO of the country name + a currency character).
-* **symbol**: The Symbol used for the currnecy (you can use utf8 to provide the symbol).
-* **format**: The format uses a ruby style formatting: `%{<option>}` show a sepcific option (usually the symbol), `%<value>.<d>f` is used to format the value of the money object. <d> should include the number of decimal points.
+* **symbol**: The Symbol used for the currency (you can use utf8 to provide the symbol).
+* **format**: The format uses a ruby style formatting: `%{<option>}` show a specific option (usually the symbol), `%<value>.<d>f` is used to format the value of the money object. <d> should include the number of decimal points.
 * **default_flag**: Optional, used to mark the currency as the default currency (override the previous default currency).
 
 ### Currency global functions
@@ -52,7 +52,7 @@ Currency.find_by_code('USD');       // Find US Dollar
 Currency.find_by_code('GB');        // Will return the GBP (Great Britain Pound) currency object
 
 // Used by serveral of the functions to decipher their currency inputs
-Currency.find_definitive();         // Returns the default currnecy (if no default throws an error)
+Currency.find_definitive();         // Returns the default currency (if no default throws an error)
 Currency.find_definitive('EU');     // Will return the EUR currency object (if you defined one)
 Currency.find_definitive(currency); // Return the currency itself
 
@@ -68,10 +68,10 @@ Currency.find_all();      // Get the list of all currencies in the system
 Currency.find_all(true);  // Get only the highlighted currencies
 Currency.find_all(false); // Get only the non-highlighted currencies
 
-```javascript
+```
 
 **Note**: Currency support multiple currencies per country.
-If such case occures. The `Currency.find_by_code(country_code)` will return a list of currencies and
+If such case occurs. The `Currency.find_by_code(country_code)` will return a list of currencies and
 `Currency.find_definitive(country_code)` will throw an error.
 
 ### Currency object methods
@@ -91,10 +91,10 @@ The Exchange name space is used to support querying the web for an exchange rate
 Currently Exchange uses Yahoo Query to query for exchange rates but this name space can be expanded to support other
 currencies.
 
-Exchange supports can be used both on the client and on the server but the usage is abit different. This section will
+Exchange supports can be used both on the client and on the server but the usage is a bit different. This section will
 concentrate on the common and server only operations.
 
-See the reactivity section for explanasion on using Exchange on the client.
+See the reactivity section for explanation on using Exchange on the client.
 
 ### The `Exchange` function
 
@@ -106,7 +106,7 @@ be the default currency.
 ```javascript
 
 // Synchronous calls available only on the server
-var rate = Exchange('EUR');  // Return the yql rate record of the exchange from the default currnecy to Euro.
+var rate = Exchange('EUR');  // Return the yql rate record of the exchange from the default currency to Euro.
 var rates = Exchange(['EUR','CAD','ILS']); // Return a list of yql rate records of the exchange from the default
                                            // currency to Euro, Canadian Dollars and Israeli Sheqel
 var rates = Exchange(['USD','EUR'],['JPY', 'ILS']); // Returns all exchange rates 'JPYUSD', 'JPYEUR','ILSUSD' and 'ILSEUR'.
@@ -192,7 +192,7 @@ money_var.set(money);
 var exchanged_money = def_money.exchange('JPY);
 
 // Reactively setting the value of the original money
-// If you want to change the currnecy you must create a new money object
+// If you want to change the currency you must create a new money object
 // and set it to the money_var and recreate the exchange tracking
 money.set_value(145);
 money.set_str("$566");
@@ -219,7 +219,7 @@ On the client, when the exchange method is called on the original money object i
 The Exchange package **on the client**, once any exchange pair has been registered runs an update function in the interval defined by `Exchage.exchange_interval_min`
 variable.
 
-Following snipper includes the low-level functions used for reactivity:
+Following snippet includes the low-level functions used for reactivity:
 
 ```javascript
 
@@ -228,13 +228,13 @@ var rate_var = Exchange.register_exchange('USD','JPY'); // Register the JPYUSD p
                                                         // Returns a ReactiveVar
                                                         
 Exchange.unregister_exchange('USD','JPY');   // Unregister the JPYUSD pair from querying.
-                                             // This does not necessarly remove the pais from the query list
+                                             // This does not necessary remove the pairs from the query list
                                              // Since we use reference counter 
 
-// Eventhough it say 'now' download_exchange_now not necessarly performs the exchange update immediatly
-// If you want it to be performed immediatly (still asynchronously) use the second form
+// Even though it say 'now' download_exchange_now not necessary performs the exchange update immediately
+// If you want it to be performed immediately (still asynchronously) use the second form
 Exchange.download_exchange_now();     // Runs the download exchange if it is not running and redo it in Exchage.exchange_interval_min intervals
-Exchange.download_exchange_now(true); // Runs the download exchange immediatly and redi it in Exchage.exchange_interval_min intervals
+Exchange.download_exchange_now(true); // Runs the download exchange immediately and redo it in Exchage.exchange_interval_min intervals
                                       // (If there is already a setInterval running it will stop it and create new setInterval)
 
 ```
@@ -244,7 +244,7 @@ Exchange.download_exchange_now(true); // Runs the download exchange immediatly a
 The package also includes few templates and helpers
 
 * `currencyInfo`: Displays an info about a currency. It works in the context of an Currency object and you can also add a `flag_url` helper (or add it as an attribute on the Currency object).
-* `currencySelector`: Create a select element with all the currencies (with highlighted currnecies first). It uses internally the currencyInfo template so it can show also flags.
+* `currencySelector`: Create a select element with all the currencies (with highlighted currencies first). It uses internally the currencyInfo template so it can show also flags.
 * `showMoney`: Just show the reactive value (`money.get_str()`) of a Money object.
 
 ## License
