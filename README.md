@@ -308,7 +308,7 @@ if (Meteor.isClient) {
   
   // Query the Global resource for list of all currencies
   // and set them up in the Currency system
-  global.get_currencies(function(error,result) {
+  global.getCurrencies(function(error,result) {
     if (!error) {
       Currency.createMultiple(result.data);
       Session.set("currencyReady",true);
