@@ -1,7 +1,7 @@
 <template name="currencyInfo">
     <span class="currency">
-        {{#if flag_url}}
-            <img class="flag" src="{{flag_url}}" alt="{{code}}"/>
+        {{#if flagUrl}}
+            <img class="flag" src="{{flagUrl}}" alt="{{code}}"/>
         {{/if}}
         <span class="code">{{code}}</span>
     </span>
@@ -10,12 +10,12 @@
 <template name="currencySelector">
     <select {{select_attrs}}>
         {{#each highlightedCurrencies}}
-          <option value="{{code}}" selected="{{#if isSelected code}}selected{{/if}}" {{option_attrs}}>
+          <option value="{{code}}" selected="{{#if isSelected code}}selected{{/if}}" {{optionsAttrs}}>
             {{> currencyInfo}}
           </option>
         {{/each}}
         {{#each remainingCurrencies}}
-          <option value="{{code}}" selected="{{#if isSelected code}}selected{{/if}}" {{option_attrs}}>
+          <option value="{{code}}" selected="{{#if isSelected code}}selected{{/if}}" {{optionsAttrs}}>
             {{> currencyInfo}}
           </option>
         {{/each}}
@@ -23,5 +23,5 @@
 </template>
 
 <template name="showMoney">
-    {{value_str}}
+    {{valueStr}}
 </template>

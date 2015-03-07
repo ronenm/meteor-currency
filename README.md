@@ -21,12 +21,12 @@ new Currency({
   code: 'USD',
   symbol: '$',
   format: '%{symbol}%<value>.2f',
-  default_flag: true
+  defaultFlag: true
 };
 
 
 // Create multiple currencies
-Currency.create_multiple(<array_of_options>);
+Currency.createMultiple(<array_of_options>);
 
 ```
 
@@ -38,7 +38,7 @@ When a currency is created, it is being held in an internal cache so there is no
 * **code**: The ISO code of the currency (the ISO of the country name + a currency character).
 * **symbol**: The Symbol used for the currency (you can use utf8 to provide the symbol).
 * **format**: The format uses a ruby style formatting: `%{<option>}` show a specific option (usually the symbol), `%<value>.<d>f` is used to format the value of the money object. <d> should include the number of decimal points.
-* **default_flag**: Optional, used to mark the currency as the default currency (override the previous default currency).
+* **defaultFlag**: Optional, used to mark the currency as the default currency (override the previous default currency).
 
 ### Currency global functions
 
@@ -47,40 +47,40 @@ All Currency function throws Meter.Error in case of an error!
 ```javascript
 
 // Find a currency by a code (you can use also two characters country code)
-Currency.find_by_code('USD');       // Find US Dollar
-Currency.find_by_code('GB');        // Will return the GBP (Great Britain Pound) currency object
+Currency.findByCode('USD');       // Find US Dollar
+Currency.findByCode('GB');        // Will return the GBP (Great Britain Pound) currency object
 
 // Used by serveral of the functions to decipher their currency inputs
-Currency.find_definitive();         // Returns the default currency (if no default throws an error)
-Currency.find_definitive('EU');     // Will return the EUR currency object (if you defined one)
-Currency.find_definitive(currency); // Return the currency itself
+Currency.findDefinitive();         // Returns the default currency (if no default throws an error)
+Currency.findDefinitive('EU');     // Will return the EUR currency object (if you defined one)
+Currency.findDefinitive(currency); // Return the currency itself
 
 // Compare two currencies objects
 Currency.equal(c1,c2);   // Return true if the codes of currency c1 and currency c2 is the same
 
 // Currencies highlighting support used for option lists for selection of currencies
-Currency.set_highlight('USD','GBD','EUR');  // Sets the currencies codes to highlight (no checking is done on the names)
-Currency.append_highlight('CAD');           // Add additional currency/ies to the highlighted list
+Currency.setHighlight('USD','GBD','EUR');  // Sets the currencies codes to highlight (no checking is done on the names)
+Currency.appendHighlight('CAD');           // Add additional currency/ies to the highlighted list
 
 // Get a list of currencies
-Currency.find_all();      // Get the list of all currencies in the system
-Currency.find_all(true);  // Get only the highlighted currencies
-Currency.find_all(false); // Get only the non-highlighted currencies
+Currency.findAll();      // Get the list of all currencies in the system
+Currency.findAll(true);  // Get only the highlighted currencies
+Currency.findAll(false); // Get only the non-highlighted currencies
 
 ```
 
-**Note**: Currency support multiple currencies per country. If such case occurs. The `Currency.find_by_code(country_code)` will return a list of currencies and
-`Currency.find_definitive(country_code)` will throw an error.
+**Note**: Currency support multiple currencies per country. If such case occurs. The `Currency.findByCode(country_code)` will return a list of currencies and
+`Currency.findDefinitive(country_code)` will throw an error.
 
 ### Currency object methods
 
 ```javascript
 
-var currency = Currency.find_by_code("AUD");
-currency.to_str(145.3);         // Returns "$145.30"
-currency.prase_str("$35.5");    // Returns 35.5
-currency.prase_str("QWE35.50"); // Returns 35.5 (ignore irrelevant strings)
-currency.prase_str("$-35.5");   // Returns 35.5 (ignores minus signs)
+var currency = Currency.findByCode("AUD");
+currency.toStr(145.3);         // Returns "$145.30"
+currency.parseStr("$35.5");    // Returns 35.5
+currency.parseStr("QWE35.50"); // Returns 35.5 (ignore irrelevant strings)
+currency.parseStr("$-35.5");   // Returns 35.5 (ignores minus signs)
 
 ```
 
@@ -107,14 +107,14 @@ var rates = Exchange(['EUR','CAD','ILS']); // Return a list of yql rate records 
 var rates = Exchange(['USD','EUR'],['JPY', 'ILS']); // Returns all exchange rates 'JPYUSD', 'JPYEUR','ILSUSD' and 'ILSEUR'.
 
 // Asynchronous calls available on the server and client
-var exchange_callback = function(error, result) {};  // This is the callback prorotype
-                                                     // result may include a single exchange record or
-                                                     // a list of exchange records
+var exchangeCallback = function(error, result) {};  // This is the callback prorotype
+                                                    // result may include a single exchange record or
+                                                    // a list of exchange records
                                     
 // The same examples as above with a callback                 
-Exchange('EUR',exchange_callback);                        // exchange rate from default currency to single currency
-Exchange(['EUR','CAD','ILS'],exchange_callback);          // exchange rates from default currency to multiple currencies
-Exchange(['USD','EUR'],['JPY', 'ILS'],exchange_callback); // exchange rates between multiple currencies
+Exchange('EUR',exchangeCallback);                        // exchange rate from default currency to single currency
+Exchange(['EUR','CAD','ILS'],exchangeCallback);          // exchange rates from default currency to multiple currencies
+Exchange(['USD','EUR'],['JPY', 'ILS'],exchangeCallback); // exchange rates between multiple currencies
 
 ```
 
@@ -125,16 +125,16 @@ The Money class is available on both server and client but in the client it can 
 
 ```javascript
 
-var def_money = new Money(35.5);        // Creata a default money object
-var my_money = new Money(100.4,'USD');  // Use a money code (you can also use the coutry code)
-var m2 = new Money('$100.403','USD');   // Uses `Currency.parse_str` for parsing the value
-my_money.to_str();                      // "$100.40"
-m2.to_str();                            // "$100.40"
-Money.equal(my_money,m2);               // Returns true since Money uses the scale defined in the format
-                                        // to round 100.403 to 100.4
+var defMoney = new Money(35.5);        // Creata a default money object
+var myMoney = new Money(100.4,'USD');  // Use a money code (you can also use the coutry code)
+var m2 = new Money('$100.403','USD');  // Uses `Currency.parse_str` for parsing the value
+myMoney.toStr();                       // "$100.40"
+m2.toStr();                            // "$100.40"
+Money.equal(myMoney,m2);               // Returns true since Money uses the scale defined in the format
+                                       // to round 100.403 to 100.4
                                         
 var m3 = new Money(100.4,'CAD');
-Money.equal(m2,m3);                     // Returns false since m2 and m3 are of different currencies
+Money.equal(m2,m3);                    // Returns false since m2 and m3 are of different currencies
 
 ```
 
@@ -143,8 +143,8 @@ The `exchange` method on the server performs an immediate call the `Exchange` fu
 
 ```javascript
 
-var def_money = new Money(100,'USD');
-var exchanged_money = def_money.exchange('JPY'); // Create new money object with the exchanged rate to Yen
+var defMoney = new Money(100,'USD');
+var exchangedMoney = defMoney.exchange('JPY'); // Create new money object with the exchanged rate to Yen
 
 ```
 
@@ -157,11 +157,11 @@ Reactivity allows you to avoid network request to your server by allowing the cl
 
 Since the exchange rates are used mainly for estimation (since the final real exchange depends on the money processor exchange rate and on commissions), we can update the exchange rates infrequently.
 
-The default of the package is to update every 10 minutes. You can change it by modifying the `Exchange.exchange_interval_min` variable:
+The default of the package is to update every 10 minutes. You can change it by modifying the `Exchange.exchangeIntervalMin` variable:
 
 ```javascript
 
-Exchange.exchange_interval_min = 1;  // Set the query interval to 1 minute
+Exchange.exchangeIntervalMin = 1;  // Set the query interval to 1 minute
 
 ```
 
@@ -175,30 +175,30 @@ The next section will describe what's going on behind the scenes.
 // The following code is available only on the client
 
 // Create an empty ReactiveVar with the Money's equal function
-var money_var = Money.new_reactive_var();
+var moneyVar = Money.newReactiveVar();
 
 // Set a Money object to the ReactiveVar
 var money = new Money(150,'CAD');
-money_var.set(money);
+moneyVar.set(money);
 
 // The Client's exchange methods create a new money object that tracks
 // the change of the original money as well as the exchange rate change
-var exchanged_money = def_money.exchange('JPY');
+var exchangedMoney = defMoney.exchange('JPY');
 
 // Reactively setting the value of the original money
 // If you want to change the currency you must create a new money object
-// and set it to the money_var and recreate the exchange tracking
+// and set it to the moneyVar and recreate the exchange tracking
 money.set_value(145);
 money.set_str("$566");
 
 // Reactively getting the value of a money object
-exchanged_money.get_value();  // Returns a number (or null if the value not available yet)
-exchanged_money.get_str();    // Returns a formatted string (or empty string if value not available yet)
+exchangedMoney.getValue();  // Returns a number (or null if the value not available yet)
+exchangedMoney.getStr();    // Returns a formatted string (or empty string if value not available yet)
 
 // Stop tracking the exchange rate and the changes to the value of the original
 // money object.
 // Use it when you discard the original money object
-exchanged_money.stop_exchange_tracker();
+exchangedMoney.stopExchangeTracker();
 
 ```
 
@@ -206,30 +206,30 @@ exchanged_money.stop_exchange_tracker();
 
 On the client, when the exchange method is called on the original money object it performs two actions:
 
-1. Register the exchange pairs for exchange rate tracking, using `Exchange.register_exchange`. This function returns a reactive exchange variable (either existing or newly created).
+1. Register the exchange pairs for exchange rate tracking, using `Exchange.registerExchange`. This function returns a reactive exchange variable (either existing or newly created).
 
 2. Start a `Tracker.autorun` that calculate the value based on the value of the original money object and the exchange rate (both reactive).
 
-The Exchange package **on the client**, once any exchange pair has been registered runs an update function in the interval defined by `Exchage.exchange_interval_min`
+The Exchange package **on the client**, once any exchange pair has been registered runs an update function in the interval defined by `Exchage.exchangeIntervalMin`
 variable.
 
 Following snippet includes the low-level functions used for reactivity:
 
 ```javascript
 
-var rate_var = Exchange.register_exchange('USD','JPY'); // Register the JPYUSD pair for querying by the Exchange package
-                                                        // If the pair already exist increase its reference counter
+var rate_var = Exchange.registerExchange('USD','JPY'); // Register the JPYUSD pair for querying by the Exchange package
+                                                        // If the pair already exists increase its reference counter
                                                         // Returns a ReactiveVar
                                                         
-Exchange.unregister_exchange('USD','JPY');   // Unregister the JPYUSD pair from querying.
+Exchange.unregisterExchange('USD','JPY');   // Unregister the JPYUSD pair from querying.
                                              // This does not necessary remove the pairs from the query list
                                              // Since we use reference counter 
 
-// Even though it say 'now' download_exchange_now not necessary performs the exchange update immediately
+// Even though it say 'now' downloadExchangeNow not necessary performs the exchange update immediately
 // If you want it to be performed immediately (still asynchronously) use the second form
-Exchange.download_exchange_now();     // Runs the download exchange if it is not running and redo it in Exchage.exchange_interval_min intervals
-Exchange.download_exchange_now(true); // Runs the download exchange immediately and redo it in Exchage.exchange_interval_min intervals
-                                      // (If there is already a setInterval running it will stop it and create new setInterval)
+Exchange.downloadExchangeNow();     // Runs the download exchange if it is not running and redo it in Exchage.exchangeIntervalMin intervals
+Exchange.downloadExchangeNow(true); // Runs the download exchange immediately and redo it in Exchage.exchangeIntervalMin intervals
+                                    // (If there is already a setInterval running it will stop it and create new setInterval)
 
 ```
 
@@ -239,7 +239,7 @@ The package also includes few templates and helpers
 
 * `currencyInfo`: Displays an info about a currency. It works in the context of an Currency object and you can also add a `flag_url` helper (or add it as an attribute on the Currency object).
 * `currencySelector`: Create a select element with all the currencies (with highlighted currencies first). It uses internally the currencyInfo template so it can show also flags.
-* `showMoney`: Just show the reactive value (`money.get_str()`) of a Money object.
+* `showMoney`: Just show the reactive value (`money.getStr()`) of a Money object.
 
 ## Example:
 
@@ -267,7 +267,7 @@ It uses the OfferJar (InKomerce) API from `ronenm:offerjar-api` to create the li
         {{>currencySelector}}
       {{/with}}
       <form class="set-from-form">
-        <input type="text" name="from" value="{{get_str}}" placeholder="Type the value that you would like to convert" />
+        <input type="text" name="from" value="{{getStr}}" placeholder="Type the value that you would like to convert" />
       </form>
     {{/with}}
   {{/if}}
@@ -293,14 +293,14 @@ if (Meteor.isClient) {
   Session.set("currencyReady",false);
   
   // This app will query for exchange rate every 2 minutes 
-  Exchange.exchange_interval_min = 2;
+  Exchange.exchangeIntervalMin = 2;
   
   // We start with two empty Money ReactiveVars
-  var from = Money.new_reactive_var();
-  var to = Money.new_reactive_var();
+  var from = Money.newReactiveVar();
+  var to = Money.newReactiveVar();
   
   // Make US Dollars, Euro and GB Punds the main currencies
-  Currency.set_highlight('USD','EUR','GBP');
+  Currency.setHighlight('USD','EUR','GBP');
 
   // Connect to OfferJar/InKomerce Global resource
   // This is the only resource available to clients
@@ -310,7 +310,7 @@ if (Meteor.isClient) {
   // and set them up in the Currency system
   global.get_currencies(function(error,result) {
     if (!error) {
-      Currency.create_multiple(result.data);
+      Currency.createMultiple(result.data);
       Session.set("currencyReady",true);
     }
   });
@@ -332,18 +332,18 @@ if (Meteor.isClient) {
   
   Template.fromMoney.events({
     'change select': function(event) {
-      var new_cur = $(event.target).val();
-      if (new_cur != this.code) {
+      var newCur = $(event.target).val();
+      if (newCur != this.code) {
         // When there is a change in currnecy we must create a new
         // original Money object and new exchanged money object
-        var cur_money = from.get();
-        from.set(new Money(cur_money.value,new_cur));
+        var curMoney = from.get();
+        from.set(new Money(curMoney.value,newCur));
         
-        var to_cur_money = to.get();
-        if (to_cur_money instanceof Money) {
-          to_cur_money.stop_exchange_tracker(); // No need to track the old exchange anymore
+        var toCurMoney = to.get();
+        if (toCurMoney instanceof Money) {
+          toCurMoney.stopExchangeTracker(); // No need to track the old exchange anymore
           // Create a new exchange tracking
-          to.set(from.get().exchange(to_cur_money.currency));
+          to.set(from.get().exchange(toCurMoney.currency));
         }
       }
     },
@@ -361,13 +361,13 @@ if (Meteor.isClient) {
   
   Template.toMoney.events({
     'change select': function(event) {
-      var new_cur = $(event.target).val();
-      if (new_cur != this.code) {
+      var newCur = $(event.target).val();
+      if (newCur != this.code) {
         // When the currnecy change we must create a new Money object
-        var cur_money = to.get();
-        if (cur_money instanceof Money) {
-          cur_money.stop_exchange_tracker(); // Make sure to stop the unnecessary tracking
-          to.set(from.get().exchange(new_cur));
+        var curMoney = to.get();
+        if (curMoney instanceof Money) {
+          curMoney.stopExchangeTracker(); // Make sure to stop the unnecessary tracking
+          to.set(from.get().exchange(newCur));
         }
       }
     }
