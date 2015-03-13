@@ -12,7 +12,7 @@ Package.describe({
 
 Package.onUse(function(api) {
   api.versionsFrom('1.0.3.1');
-  api.use("sgi:sprintfjs@0.0.2");
+  api.use("sgi:sprintfjs@0.0.3");
   api.use("http");
   api.use("underscore");
   api.use("check");
