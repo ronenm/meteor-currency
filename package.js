@@ -1,6 +1,6 @@
 Package.describe({
   name: 'ronenm:currency',
-  version: '0.1.0',
+  version: '0.1.1',
   // Brief, one-line summary of the package.
   summary: 'Meteor Native Currency with support for client only reactive exchange rates',
   // URL to the Git repository containing the source code for this package.
@@ -12,7 +12,7 @@ Package.describe({
 
 Package.onUse(function(api) {
   api.versionsFrom('1.0.3.1');
-  api.use("sgi:sprintfjs@0.0.3");
+  api.use("sgi:sprintfjs@0.0.2");
   api.use("http");
   api.use("underscore");
   api.use("check");
